@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Will You Be My Valentine?</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial Rounded MT Bold', 'Arial', sans-serif;
+        }
+        
+        body {
+            background-color: #fff0f5;
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(#ffcce0 1.5px, transparent 1.5px),
+                radial-gradient(#ffd9e6 1.5px, transparent 1.5px);
+            background-size: 40px 40px;
+            background-position: 0 0, 20px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        
+        /* Envelope Container */
+        .envelope-container {
+            position: relative;
+            width: 100%;
+            max-width: 800px;
+            height: 500px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            perspective: 1000px;
+        }
+        
+        /* Envelope Styles */
+        .envelope {
+            position: relative;
+            width: 320px;
+            height: 220px;
+            cursor: pointer;
+            transition: transform 0.5s;
+            transform-style: preserve-3d;
+        }
+        
+        .envelope.open {
+            transform: translateY(-100px);
+        }
+        
+        .envelope-front {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-color: #ff3366;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(255, 51, 102, 0.3);
+            z-index: 2;
+            transform-origin: bottom;
+            transition: transform 1s ease;
+        }
+        
+        .envelope.open .envelope-front {
+            transform: rotateX(180deg);
+            z-index: 0;
+        }
+        
+        .envelope-flap {
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-left: 160px solid transparent;
+            border-right: 160px solid transparent;
+            border-bottom: 120px solid #ff0044;
+            top: -120px;
+            left: 0;
+            transform-origin: top;
+            transition: transform 1s ease;
+            z-index: 3;
+        }
+        
+        .envelope.open .envelope-flap {
+            transform: rotateX(180deg);
+        }
+        
+        .envelope-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-color: #ff6699;
+            border-radius: 10px;
+            box-shadow: 0 10px 25px rgba(255, 51, 102, 0.3);
+            z-index: 1;
+        }
+        
+        /* Heart seal on envelope */
+        .heart-seal {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background-color: #ffeb3b;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 4;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.5s ease;
+        }
+        
+        .envelope.open .heart-seal {
+            transform: translateX(-50%) rotate(360deg) scale(0.8);
+            top: -40px;
+        }
+        
+        .heart-seal i {
+            color: #ff3366;
+            font-size: 30px;
+            animation: heartbeat 1.5s infinite;
+        }
+        
+        /* Letter inside envelope */
+        .letter {
+            position: absolute;
+            width: 300px;
+            height: 190px;
+            background-color: white;
+            border-radius: 8px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            z-index: 0;
+            transform: translateY(10px);
+            transition: all 1s ease 0.5s;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+        }
+        
+        .envelope.open .letter {
+            transform: translateY(-180px);
+            opacity: 1;
+            z-index: 5;
+        }
+        
+        .letter h2 {
+            color: #ff3366;
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 1.8rem;
+        }
+        
+        .letter p {
+            color: #666;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .open-instructions {
+            margin-top: 30px;
+            color: #ff3366;
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-align: center;
+            animation: pulse 2s infinite;
+        }
+        
+        /* Main Proposal Page (Initially Hidden) */
+        .container {
+            text-align: center;
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(255, 105, 180, 0.3);
+            max-width: 800px;
+            width: 90%;
+            position: relative;
+            border: 8px solid #ff66a3;
+            animation: fadeIn 1s ease-out;
+            display: none;
+            margin-bottom: 40px;
+        }
+        
+        .heart-decoration {
+            position: absolute;
+            color: #ff66a3;
+            font-size: 24px;
+            animation: float 3s infinite ease-in-out;
+        }
+        
+        .heart-1 { top: 10px; left: 20px; animation-delay: 0s; }
+        .heart-2 { top: 10px; right: 20px; animation-delay: 0.5s; }
+        .heart-3 { bottom: 10px; left: 20px; animation-delay: 1s; }
+        .heart-4 { bottom: 10px; right: 20px; animation-delay: 1.5s; }
+        
+        h1 {
+            color: #ff3385;
+            font-size: 2.8rem;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .couple-photo {
+            width: 100%;
+            max-width: 500px;
+            height: auto;
+            border-radius: 15px;
+            border: 5px solid #ff66a3;
+            margin: 20px auto;
+            box-shadow: 0 8px 20px rgba(255, 105, 180, 0.3);
+        }
+        
+        .message {
+            font-size: 1.3rem;
+            color: #d81b60;
+            margin-bottom: 30px;
+            line-height: 1.6;
+            padding: 0 20px;
+            text-align: left;
+        }
+        
+        .message p {
+            margin-bottom: 20px;
+        }
+        
+        .name {
+            color: #ff0066;
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+        
+        .buttons-container {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 40px;
+            flex-wrap: wrap;
+            position: relative;
+            min-height: 120px;
+        }
+        
+        .valentine-btn {
+            padding: 18px 45px;
+            font-size: 1.5rem;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            box-shadow: 0 6px 0 rgba(0, 0, 0, 0.2);
+            position: relative;
+            z-index: 10;
+        }
+        
+        .yes-btn {
+            background-color: #ff4d94;
+            color: white;
+        }
+        
+        .yes-btn:hover {
+            background-color: #ff0066;
+            transform: translateY(-5px);
+            box-shadow: 0 10px 0 rgba(0, 0, 0, 0.2);
+        }
+        
+        .yes-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 0 rgba(0, 0, 0, 0.2);
+        }
+        
+        .no-btn {
+            background-color: #ff9999;
+            color: white;
+            position: fixed;
+            transition: all 0.2s ease;
+            z-index: 1000;
+        }
+        
+        .no-btn:hover {
+            background-color: #ff6666;
+        }
+        
+        .instructions {
+            margin-top: 30px;
+            font-size: 1rem;
+            color: #ff66a3;
+            font-style: italic;
+        }
+        
+        .hearts-falling {
+            position: fixed;
+            top: -50px;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .heart {
+            position: absolute;
+            color: #ff66a3;
+            font-size: 20px;
+            opacity: 0.7;
+            animation: fall linear infinite;
+        }
+        
+        /* Yes Page Styles */
+        .yes-page {
+            display: none;
+            text-align: center;
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(255, 105, 180, 0.3);
+            max-width: 800px;
+            width: 90%;
+            position: relative;
+            border: 8px solid #ff66a3;
+            animation: fadeIn 1s ease-out;
+            margin-bottom: 40px;
+        }
+        
+        .yes-photo {
+            width: 100%;
+            max-width: 400px;
+            height: auto;
+            border-radius: 15px;
+            border: 5px solid #ff66a3;
+            margin: 20px auto;
+            box-shadow: 0 8px 20px rgba(255, 105, 180, 0.3);
+        }
+        
+        /* Close button for proposal page */
+        .close-proposal {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: #ff3366;
+            color: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s;
+        }
+        
+        .close-proposal:hover {
+            background: #ff0044;
+            transform: rotate(90deg);
+        }
+        
+        /* Animations */
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        @keyframes fall {
+            to {
+                transform: translateY(100vh) rotate(360deg);
+            }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        /* Media Queries */
+        @media (max-width: 768px) {
+            .envelope {
+                width: 280px;
+                height: 190px;
+            }
+            
+            .envelope-flap {
+                border-left: 140px solid transparent;
+                border-right: 140px solid transparent;
+                border-bottom: 105px solid #ff0044;
+                top: -105px;
+            }
+            
+            .letter {
+                width: 260px;
+                height: 170px;
+            }
+            
+            .envelope.open .letter {
+                transform: translateY(-160px);
+            }
+            
+            .container, .yes-page {
+                padding: 30px 20px;
+            }
+            
+            h1 {
+                font-size: 2.2rem;
+            }
+            
+            .message {
+                font-size: 0.8rem;
+                padding: 0 10px;
+            }
+            
+            .valentine-btn {
+                padding: 15px 35px;
+                font-size: 1.3rem;
+            }
+            
+            .buttons-container {
+                gap: 20px;
+                min-height: 140px;
+            }
+            
+            .couple-photo, .yes-photo {
+                max-width: 90%;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .envelope-container {
+                height: 400px;
+            }
+            
+            .envelope {
+                width: 240px;
+                height: 160px;
+            }
+            
+            .envelope-flap {
+                border-left: 120px solid transparent;
+                border-right: 120px solid transparent;
+                border-bottom: 90px solid #ff0044;
+                top: -90px;
+            }
+            
+            .letter {
+                width: 220px;
+                height: 140px;
+                padding: 15px;
+            }
+            
+            .envelope.open .letter {
+                transform: translateY(-140px);
+            }
+            
+            .letter h2 {
+                font-size: 1.4rem;
+            }
+            
+            .letter p {
+                font-size: 0.9rem;
+            }
+            
+            .buttons-container {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            body {
+                padding: 10px;
+            }
+            
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .message {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="hearts-falling" id="hearts-container"></div>
+    
+    <!-- Envelope Container (First Page) -->
+    <div class="envelope-container" id="envelopeContainer">
+        <div class="envelope" id="envelope">
+            <div class="envelope-front"></div>
+            <div class="envelope-flap"></div>
+            <div class="envelope-back"></div>
+            <div class="heart-seal">
+                <i class="fas fa-heart"></i>
+            </div>
+            <div class="letter">
+                <h2>For Ashlyyn O'Leary</h2>
+                <p>A special Valentine's question awaits inside...</p>
+                <p>Click the envelope to open it!</p>
+            </div>
+        </div>
+        
+        <p class="open-instructions">Click the envelope to reveal your Valentine's surprise!</p>
+    </div>
+    
+    <!-- Main Proposal Page (Hidden Initially) -->
+    <div class="container" id="mainPage">
+        <button class="close-proposal" id="closeProposal">
+            <i class="fas fa-times"></i>
+        </button>
+        
+        <i class="heart-decoration heart-1 fas fa-heart"></i>
+        <i class="heart-decoration heart-2 fas fa-heart"></i>
+        <i class="heart-decoration heart-3 fas fa-heart"></i>
+        <i class="heart-decoration heart-4 fas fa-heart"></i>
+        
+        <h1>For Ashlyyn O'Leary</h1>
+        <img src="_images/Front.jpg" 
+     style="width: auto; height: 250px; border-radius: 10px; border: 3px solid #ff66a3; margin: 20px;" 
+     alt="Me and Ashlyyn">
+        <div class="message">
+            <p>My Gorgeous </p>
+            <p>You have changed my life so so much, from the moment I saw you i knew you were the one for me and I could'nt mess up my chance with you and ever since then you have made me the happiest person in the world and I could not ask for anyone better to be in my life, you do so so much for me that you don't know about and I am extremely grateful for you my baby, I really really am </p>
+            <br>
+            <p>Will you be my Valentine my Angel?</p>
+        </div>
+        
+        <div class="buttons-container">
+            <button class="valentine-btn yes-btn" id="yesBtn">
+                <i class="fas fa-heart"></i> YES! <i class="fas fa-heart"></i>
+            </button>
+            <button class="valentine-btn no-btn" id="noBtn">
+                <i class="fas fa-times"></i> No <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <p class="instructions">Hint: Try clicking the "No" button... if you can catch it!</p>
+    </div>
+
+    <!-- Yes Page (Shows when she says yes) -->
+    <div id="yesPage" class="yes-page">
+        <h1>You Said YES! <i class="fas fa-heart" style="color: #ff0066;"></i></h1>
+                <img src="_images/Yes.jpeg" 
+     style="width: 300px; height: auto; border-radius: 10px; border: 3px solid #ff66a3; margin: 20px;" 
+     alt="Me and Ashlyyn">
+        <div class="message">
+        <div class="message">
+            <p>You've just made me the happiest person in the world! I promise to make this Valentine's Day and every day after special for you. You are amazing</p>
+            
+        </div>
+        
+        <div style="margin-top: 40px;">
+            <button class="valentine-btn yes-btn" id="backBtn">
+                <i class="fas fa-arrow-left"></i> Back to Question
+            </button>
+        </div>
+        
+        <div class="instructions" style="margin-top: 30px;">
+            <p>I can't wait to see you again and give you the biggest hug! <i class="fas fa-heart" style="color: #ff0066;"></i></p>
+        </div>
+    </div>
+
+    <script>
+        // Create falling hearts
+        function createHearts() {
+            const heartsContainer = document.getElementById('hearts-container');
+            const heartCount = 25;
+            
+            for (let i = 0; i < heartCount; i++) {
+                const heart = document.createElement('div');
+                heart.classList.add('heart');
+                heart.innerHTML = '❤';
+                
+                // Random position and animation
+                const left = Math.random() * 100;
+                const size = Math.random() * 20 + 10;
+                const duration = Math.random() * 5 + 5;
+                const delay = Math.random() * 5;
+                
+                heart.style.left = `${left}vw`;
+                heart.style.fontSize = `${size}px`;
+                heart.style.animationDuration = `${duration}s`;
+                heart.style.animationDelay = `${delay}s`;
+                
+                heartsContainer.appendChild(heart);
+            }
+        }
+        
+        // Envelope interaction
+        const envelope = document.getElementById('envelope');
+        const envelopeContainer = document.getElementById('envelopeContainer');
+        const mainPage = document.getElementById('mainPage');
+        const openInstructions = document.querySelector('.open-instructions');
+        
+        envelope.addEventListener('click', openEnvelope);
+        envelope.addEventListener('touchstart', openEnvelope);
+        
+        function openEnvelope() {
+            // Open the envelope
+            envelope.classList.add('open');
+            
+            // Hide the open instructions
+            openInstructions.style.opacity = '0';
+            
+            // Show main proposal page after envelope animation completes
+            setTimeout(() => {
+                envelopeContainer.style.display = 'none';
+                mainPage.style.display = 'block';
+                mainPage.style.animation = 'fadeIn 1s ease-out';
+                
+                // Scroll to top to show the main page
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }, 1500);
+        }
+        
+        // Close proposal page (go back to envelope)
+        const closeProposal = document.getElementById('closeProposal');
+        closeProposal.addEventListener('click', function() {
+            mainPage.style.display = 'none';
+            envelopeContainer.style.display = 'flex';
+            envelope.classList.remove('open');
+            
+            // Show the open instructions again
+            setTimeout(() => {
+                openInstructions.style.opacity = '1';
+            }, 500);
+        });
+        
+        // Make the "No" button move randomly across the ENTIRE PAGE
+        const noBtn = document.getElementById('noBtn');
+        
+        // Initial position for the "No" button (centered)
+        noBtn.style.left = '50%';
+        noBtn.style.top = '50%';
+        noBtn.style.transform = 'translate(-50%, -50%)';
+        
+        // Function to move button randomly across entire viewport
+        function moveButton() {
+            // Get viewport dimensions
+            const viewportWidth = window.innerWidth;
+            const viewportHeight = window.innerHeight;
+            
+            // Get button dimensions
+            const buttonWidth = noBtn.offsetWidth;
+            const buttonHeight = noBtn.offsetHeight;
+            
+            // Calculate random position within viewport
+            const maxX = viewportWidth - buttonWidth - 20; // -20 for padding
+            const maxY = viewportHeight - buttonHeight - 20;
+            
+            // Ensure the button stays within viewport bounds
+            const randomX = Math.max(10, Math.min(maxX, Math.random() * maxX));
+            const randomY = Math.max(10, Math.min(maxY, Math.random() * maxY));
+            
+            // Apply new position
+            noBtn.style.left = `${randomX}px`;
+            noBtn.style.top = `${randomY}px`;
+            
+            // Add a little rotation for fun
+            noBtn.style.transform = `rotate(${Math.random() * 20 - 10}deg)`;
+            
+            // Change button color temporarily
+            noBtn.style.backgroundColor = '#ff3333';
+            setTimeout(() => {
+                noBtn.style.backgroundColor = '#ff9999';
+            }, 200);
+            
+            // Make button slightly larger/smaller for extra fun
+            const randomScale = 0.8 + Math.random() * 0.4;
+            noBtn.style.transform = `rotate(${Math.random() * 20 - 10}deg) scale(${randomScale})`;
+        }
+        
+        // Add multiple event listeners for better triggering
+        noBtn.addEventListener('mouseover', moveButton);
+        noBtn.addEventListener('click', moveButton);
+        noBtn.addEventListener('touchstart', moveButton);
+        
+        // Also move when mouse gets close (within 50px)
+        document.addEventListener('mousemove', function(event) {
+            const btnRect = noBtn.getBoundingClientRect();
+            const btnCenterX = btnRect.left + btnRect.width / 2;
+            const btnCenterY = btnRect.top + btnRect.height / 2;
+            const mouseX = event.clientX;
+            const mouseY = event.clientY;
+            
+            // Calculate distance between mouse and button center
+            const distance = Math.sqrt(
+                Math.pow(mouseX - btnCenterX, 2) + 
+                Math.pow(mouseY - btnCenterY, 2)
+            );
+            
+            // If mouse is within 100px of button, move it
+            if (distance < 100) {
+                moveButton();
+            }
+        });
+        
+        // Handle "Yes" button click
+        const yesBtn = document.getElementById('yesBtn');
+        const yesPage = document.getElementById('yesPage');
+        
+        yesBtn.addEventListener('click', function() {
+            // Hide main page and show the yes page
+            mainPage.style.display = 'none';
+            yesPage.style.display = 'block';
+            
+            // Scroll to top to show the yes page
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            
+            // Add celebration effect
+            celebrate();
+        });
+        
+        // Handle back button click
+        const backBtn = document.getElementById('backBtn');
+        backBtn.addEventListener('click', function() {
+            // Show main page and hide the yes page
+            yesPage.style.display = 'none';
+            mainPage.style.display = 'block';
+            
+            // Scroll to top to show the main page
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+        
+        // Celebration effect for when she says yes
+        function celebrate() {
+            // Create explosion of hearts
+            for (let i = 0; i < 50; i++) {
+                setTimeout(() => {
+                    const heart = document.createElement('div');
+                    heart.classList.add('heart');
+                    heart.innerHTML = '❤';
+                    
+                    // Random position and animation
+                    const left = Math.random() * 100;
+                    const size = Math.random() * 25 + 15;
+                    const duration = Math.random() * 3 + 2;
+                    
+                    heart.style.left = `${left}vw`;
+                    heart.style.top = `50vh`;
+                    heart.style.fontSize = `${size}px`;
+                    heart.style.animationDuration = `${duration}s`;
+                    heart.style.color = '#ff0066';
+                    heart.style.opacity = '0.9';
+                    
+                    // Add to the yes page
+                    yesPage.appendChild(heart);
+                    
+                    // Remove heart after animation
+                    setTimeout(() => {
+                        heart.remove();
+                    }, duration * 1000);
+                }, i * 100);
+            }
+        }
+        
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            createHearts();
+            
+            // Scroll to top on page load
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+    </script>
+</body>
+</html>
